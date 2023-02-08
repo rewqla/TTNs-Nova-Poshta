@@ -33,15 +33,15 @@ function FillDocumnetsFromPage() {
     requestBody.methodProperties.Documents.push(GetPageData());
 }
 
-async function FillDocumnetsWithFinalData(){
-    requestBody.methodProperties.Documents[0].Phone=await GetRecipientPhone();
+async function FillDocumnetsWithFinalData() {
+    requestBody.methodProperties.Documents[0].Phone = await GetRecipientPhone();
 }
 
-function GetPageData() {   
+function GetPageData() {
 
     return {
         DocumentNumber: document.getElementById("Number").value,
-        Phone: document.getElementById("Phone").value   
+        Phone: document.getElementById("Phone").value
     }
 }
 
@@ -51,7 +51,7 @@ async function GetRecipientPhone() {
 
 
 
-async function FillDocumnets(){
+async function FillDocumnets() {
     FillDocumnetsFromPage();
     await FillDocumnetsWithFinalData();
 }
@@ -91,11 +91,11 @@ function CreateTTNs() {
     });
 }
 
-let t1="0674325675";
-let t2="+380674325675";
-let t3="0124325675";
-let t4="380674325675";
-let t5="59009231f76082";
+let t1 = "0674325675";
+let t2 = "+380674325675";
+let t3 = "0124325675";
+let t4 = "380674325675";
+let t5 = "59009231f76082";
 
 //0674325675 - correct
 // let regexPhone=new RegExp("^0[0-9]{9}$");
@@ -110,7 +110,6 @@ let t5="59009231f76082";
 // let regexPhone=new RegExp("^([+]?(38))?(0[0-9]{9})$");
 
 //final version 
-//let regexNumber=new RegExp("^[0-9]{14}$");
 
 
 // if(regexNumber.test(t5)){
@@ -119,3 +118,106 @@ let t5="59009231f76082";
 // else{
 //     console.log("wrong")
 // }
+
+const documentNumber = document.querySelector('#documentNumber');
+const senderPhone = document.querySelector('#senderPhone');
+
+const isRequired = value => value === '' ? false : true;
+
+const form = document.querySelector('#trackingForm');
+
+
+const checkDocumentNumber = () => {
+    let valid = false;
+
+    let regexNumber = new RegExp("^[0-9]{14}$");
+
+    const number = documentNumber.value.trim();
+
+    if (!isRequired(number)) {
+        showError(documentNumber, 'TTN number cannot be blank.');
+    } else if (!regexNumber.test(number)) {
+        showError(documentNumber, `TTN number must have 14 digits and contain only numbers`)
+    } else {
+        showSuccess(documentNumber);
+        valid = true;
+    }
+    return valid;
+};
+
+
+const checkPhoneNum = () => {
+    let regexPhone = new RegExp("^([+]?(38))?(0[0-9]{9})$");
+
+    const phone = senderPhone.value.trim();
+
+    if (!isRequired(phone)) {
+        showError(senderPhone, 'Phone number cannot be blank.');
+    } else if (!regexPhone.test(phone)) {
+        showError(senderPhone, `Wrong format of phone number`)
+    } else {
+        showSuccess(senderPhone);
+        valid = true;
+    }
+    return valid;
+};
+
+const showError = (input, message) => {
+    const formField = input.parentElement;
+
+    formField.classList.remove('success');
+    formField.classList.add('error');
+
+    const error = formField.querySelector('small');
+    error.textContent = message;
+};
+
+const showSuccess = (input) => {
+    const formField = input.parentElement;
+
+    formField.classList.remove('error');
+    formField.classList.add('success');
+
+    const error = formField.querySelector('small');
+    error.textContent = '';
+}
+
+
+
+form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    let isDocumentNumberValid = checkDocumentNumber(),
+        isPhoneNumberValid = checkPhoneNum();
+
+    let isFormValid = isDocumentNumberValid &&
+        isPhoneNumberValid;
+
+    if (isFormValid) {
+        console.log("yes -3 yea hu")
+    }
+});
+
+
+const debounce = (fn, delay = 500) => {
+    let timeoutId;
+    return (...args) => {
+        if (timeoutId) {
+            clearTimeout(timeoutId);
+        }
+        timeoutId = setTimeout(() => {
+            fn.apply(null, args)
+        }, delay);
+    };
+};
+
+form.addEventListener('input', debounce(function (e) {
+    switch (e.target.id) {
+        case 'documentNumber':
+            checkDocumentNumber();
+            break;
+        case 'senderPhone':
+            checkPhoneNum();
+            break;
+    }
+}));

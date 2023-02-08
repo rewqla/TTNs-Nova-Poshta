@@ -6,8 +6,7 @@
 </head>
 <body>
     <div>Work with Nova Poshta</div>
-    <div>
-      
+    <!-- <div>    
       <div>
         <p>Enter TTN number<input style="margin-left: 5px" type="text" value="59000923176535" id="Number"></p>
         <span id="NumberError"></span>
@@ -16,9 +15,30 @@
         <p>Enter sender phone<input style="margin-left: 5px" type="text" value="0676733781"  id="Phone"></p>
         <span id="NumberError"></span>
       </div>
-
       <button onclick="CreateTTNs()">Get TTN</button>
-    </div>
+    </div> -->
+
+    <div class="container">
+      <form id="trackingForm" class="form">
+          <h1>Sign Up</h1>
+          <div class="form-field">
+              <label for="documentNumber">TTN number:</label>
+              <input type="text" name="documentNumber" id="documentNumber" autocomplete="off">
+              <small></small>
+          </div>
+
+          <div class="form-field">
+              <label for="senderPhone">Enter sender phone:</label>
+              <input type="text" name="senderPhone" id="senderPhone" autocomplete="off">
+              <small></small>
+          </div>
+
+          <div class="form-field">
+              <input type="submit" value="Get TTN">
+          </div>
+      </form>
+  </div>
+
     <script src="script.js"></script>
 </body>
 </html>
