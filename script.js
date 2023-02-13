@@ -1,10 +1,11 @@
 const url = "https://api.novaposhta.ua/v2.0/json/";
 const configKEY = "8927155094ab3dbc66bcc1dfee991a94";
-
+let validResponse = true;
 // DocumentNumber: "59000923176535",
 // DocumentNumber: "59000923177130",
 // DocumentNumber: "59000923175689",
 // DocumentNumber: "59000923176082",
+// DocumentNumber: "20400048729901",
 //Phone: "0676733781"
 
 let requestBody = {
@@ -25,7 +26,26 @@ async function GetResponseResult() {
         body: JSON.stringify(requestBody),
     });
 
+    // console.log(await response);
+
     return await response.json();
+}
+
+function CheckResponse(response) {
+    console.log(response);
+    if (response.errors.length == 0) {
+        if (response.data[0].PhoneRecipient == "") {
+            showError(senderPhone, `Not valid phone number`)
+            validResponse = false;
+        }
+        else {
+            validResponse = true;
+        }
+    }
+    else {
+        showError(documentNumber, `Document number is not correct`)
+        validResponse = false;
+    }
 }
 
 function FillDocumnetsFromPage() {
@@ -38,15 +58,18 @@ async function FillDocumnetsWithFinalData() {
 }
 
 function GetPageData() {
-
     return {
-        DocumentNumber: document.getElementById("Number").value,
-        Phone: document.getElementById("Phone").value
+        DocumentNumber: document.getElementById("documentNumber").value,
+        Phone: document.getElementById("senderPhone").value
     }
 }
 
 async function GetRecipientPhone() {
-    return (await GetResponseResult()).data[0].PhoneRecipient;
+    let response = await GetResponseResult();
+    CheckResponse(response);
+    if (validResponse) {
+        return response.data[0].PhoneRecipient;
+    }
 }
 
 
@@ -58,66 +81,114 @@ async function FillDocumnets() {
 
 async function LoadTTNData() {
     await FillDocumnets();
-    return (await GetResponseResult()).data[0];
+    if (validResponse) {
+        return (await GetResponseResult()).data[0];
+    }
 }
 
-function CreateTTNs() {
-    console.log(1);
-    let data = LoadTTNData();
-    data.then((a) => {
-        console.log(a);
-        console.log("number of send " + a.Number);
-        console.log("creation date " + a.DateCreated);
-        console.log("estimated date of arrival of the cargo " + a.ScheduledDeliveryDate);
-        console.log("city sender " + a.CitySender);
-        console.log("address of the department sender " + a.WarehouseSenderAddress);
-        console.log("?phone of sender " + a.PhoneSender);
-        console.log("?name of sender " + a.SenderFullNameEW);
-        console.log("?description of sender " + a.CounterpartySenderDescription);
-        console.log("city recipient " + a.CityRecipient);
-        console.log("physical person " + a.CounterpartyType);
-        console.log("address of the department sender " + a.WarehouseRecipientAddress);
-        console.log("phone of recipient " + a.PhoneRecipient);
-        console.log("name of recipient " + a.RecipientFullName);
-        console.log("Number of places " + a.SeatsAmount);
-        console.log("Cargo weight " + a.DocumentWeight);
-        console.log("Type of cargo " + a.CargoType);
-        console.log("who pays for the cargo " + a.PayerType);
-        console.log("Price of delivery " + a.DocumentCost);
-        console.log("Payment Method " + a.PaymentMethod);
-        console.log("Storage " + a.VolumeWeight);
-        console.log("Description " + a.CargoDescriptionString);
-        console.log("Near price " + a.AnnouncedPrice);
+//----------------------------------
+
+const url2 = "https://api.novaposhta.ua/v2.0/json/";
+const configKEY2 = "8927155094ab3dbc66bcc1dfee991a94";
+
+let requestBodyTest = {
+    apiKey: configKEY2,
+    modelName: "TrackingDocument",
+    calledMethod: "getStatusDocuments",
+    methodProperties: {
+        //all good
+        // Documents: [{
+        //     DocumentNumber: "59000923176082",
+               ////sender
+        //     Phone: "0676733781"
+        // }]
+        Documents: [{
+            DocumentNumber: "59000923176535",
+            //recipient
+            Phone: "0974550376"
+        }]
+        //AnnouncedPrice
+
+        //no phone number
+        // Documents: [{
+        //     DocumentNumber: "59000923176082",
+        //     Phone: ""
+        // }]
+
+        //Document number is not correct        
+        // Documents: [204000487299001]
+    }
+};
+
+async function GetResponseResultTest() {
+    let response2 = await fetch(url2, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBodyTest),
     });
+
+    console.log(await response2);
+
+    return await response2.json();
+
 }
 
-let t1 = "0674325675";
-let t2 = "+380674325675";
-let t3 = "0124325675";
-let t4 = "380674325675";
-let t5 = "59009231f76082";
+const documentNumber2 = document.querySelector('#documentNumber');
+const senderPhone2 = document.querySelector('#senderPhone');
 
-//0674325675 - correct
-// let regexPhone=new RegExp("^0[0-9]{9}$");
+async function lr() {
+    let mm = await GetResponseResultTest();
+    console.log(mm);
+    if (mm.errors.length == 0) {
+        if (mm.data[0].PhoneRecipient == "") {
+            showError(senderPhone2, `Not valid phone number`)
+        }
+        else {
+            console.log("You entered good number")
+        }
+    }
+    else {
+        showError(documentNumber2, `Document number is not correct`)
+    }
+}
 
-//+380674325675 - correct
-// let regexPhone=new RegExp("^[+]38(0[0-9]{9})$");
-
-//+380674325675 and 0674325675 - correct when +0674325675 - correct too
-// let regexPhone=new RegExp("[+]?^3?8?(0[0-9]{9})$");
-
-// final version
-// let regexPhone=new RegExp("^([+]?(38))?(0[0-9]{9})$");
-
-//final version 
+lr();
 
 
-// if(regexNumber.test(t5)){
-//     console.log("correct")
-// }
-// else{
-//     console.log("wrong")
-// }
+//----------------------------------
+
+
+async function CreateTTNs() {
+    let data = await LoadTTNData();
+    console.log(2222)
+    if (validResponse) {
+            console.log(data);
+            console.log("number of send " + data.Number);
+            console.log("creation date " + data.DateCreated);
+            console.log("estimated date of arrival of the cargo " + data.ScheduledDeliveryDate);
+            console.log("city sender " + data.CitySender);
+            console.log("address of the department sender " + data.WarehouseSenderAddress);
+            console.log("phone of sender " + data.PhoneSender);
+            console.log("name of sender " + data.SenderFullNameEW);
+            console.log("description of sender " + data.CounterpartySenderDescription);
+            console.log("city recipient " + data.CityRecipient);
+            console.log("physical person " + data.CounterpartyType);
+            console.log("address of the department sender " + data.WarehouseRecipientAddress);
+            console.log("phone of recipient " + requestBody.methodProperties.Documents[0].Phone);
+            console.log("name of recipient " + data.RecipientFullName);
+            console.log("Number of places " + data.SeatsAmount);
+            console.log("Cargo weight " + data.DocumentWeight);
+            console.log("Type of cargo " + data.CargoType);
+            console.log("who pays for the cargo " + data.PayerType);
+            console.log("Price of delivery " + data.DocumentCost);
+            console.log("Payment Method " + data.PaymentMethod);
+            console.log("Storage " + data.VolumeWeight);
+            console.log("Description " + data.CargoDescriptionString);
+            console.log("Near price " + data.AnnouncedPrice);   
+    }
+}
 
 const documentNumber = document.querySelector('#documentNumber');
 const senderPhone = document.querySelector('#senderPhone');
@@ -147,6 +218,8 @@ const checkDocumentNumber = () => {
 
 
 const checkPhoneNum = () => {
+    let valid = false;
+
     let regexPhone = new RegExp("^([+]?(38))?(0[0-9]{9})$");
 
     const phone = senderPhone.value.trim();
@@ -194,7 +267,7 @@ form.addEventListener('submit', function (e) {
         isPhoneNumberValid;
 
     if (isFormValid) {
-        console.log("yes -3 yea hu")
+        CreateTTNs();
     }
 });
 
