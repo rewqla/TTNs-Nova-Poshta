@@ -1,6 +1,7 @@
 const url = "https://api.novaposhta.ua/v2.0/json/";
 const configKEY = "8927155094ab3dbc66bcc1dfee991a94";
 let validResponse = true;
+let recipientPhoneAvailable = true;
 // DocumentNumber: "59000923176535",
 // DocumentNumber: "59000923177130",
 // DocumentNumber: "59000923175689",
@@ -32,9 +33,9 @@ async function GetResponseResult() {
 }
 
 function CheckResponse(response) {
-    console.log(response);
+    // console.log(response);
     if (response.errors.length == 0) {
-        if (response.data[0].PhoneRecipient == "") {
+        if (response.data[0].PhoneRecipient == "" && response.data[0].PhoneSender == "") {
             showError(senderPhone, `Not valid phone number`)
             validResponse = false;
         }
@@ -54,7 +55,12 @@ function FillDocumnetsFromPage() {
 }
 
 async function FillDocumnetsWithFinalData() {
-    requestBody.methodProperties.Documents[0].Phone = await GetRecipientPhone();
+    let result = await GetResponseResult();
+    CheckResponse(result);
+    if (validResponse) {
+        if (result.data[0].PhoneSender == "")
+            requestBody.methodProperties.Documents[0].Phone = await GetRecipientPhone();
+    }
 }
 
 function GetPageData() {
@@ -86,107 +92,37 @@ async function LoadTTNData() {
     }
 }
 
-//----------------------------------
-
-const url2 = "https://api.novaposhta.ua/v2.0/json/";
-const configKEY2 = "8927155094ab3dbc66bcc1dfee991a94";
-
-let requestBodyTest = {
-    apiKey: configKEY2,
-    modelName: "TrackingDocument",
-    calledMethod: "getStatusDocuments",
-    methodProperties: {
-        //all good
-        // Documents: [{
-        //     DocumentNumber: "59000923176082",
-               ////sender
-        //     Phone: "0676733781"
-        // }]
-        Documents: [{
-            DocumentNumber: "59000923176535",
-            //recipient
-            Phone: "0974550376"
-        }]
-        //AnnouncedPrice
-
-        //no phone number
-        // Documents: [{
-        //     DocumentNumber: "59000923176082",
-        //     Phone: ""
-        // }]
-
-        //Document number is not correct        
-        // Documents: [204000487299001]
-    }
-};
-
-async function GetResponseResultTest() {
-    let response2 = await fetch(url2, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBodyTest),
-    });
-
-    console.log(await response2);
-
-    return await response2.json();
-
-}
-
-const documentNumber2 = document.querySelector('#documentNumber');
-const senderPhone2 = document.querySelector('#senderPhone');
-
-async function lr() {
-    let mm = await GetResponseResultTest();
-    console.log(mm);
-    if (mm.errors.length == 0) {
-        if (mm.data[0].PhoneRecipient == "") {
-            showError(senderPhone2, `Not valid phone number`)
-        }
-        else {
-            console.log("You entered good number")
-        }
-    }
-    else {
-        showError(documentNumber2, `Document number is not correct`)
-    }
-}
-
-lr();
-
-
-//----------------------------------
-
-
 async function CreateTTNs() {
+    // let data2 = await GetResponseResultTest();
+    // let data = data2.data[0];
+
     let data = await LoadTTNData();
-    console.log(2222)
+    // console.log(data);
+    console.log("-------------------------------------------")
     if (validResponse) {
-            console.log(data);
-            console.log("number of send " + data.Number);
-            console.log("creation date " + data.DateCreated);
-            console.log("estimated date of arrival of the cargo " + data.ScheduledDeliveryDate);
-            console.log("city sender " + data.CitySender);
-            console.log("address of the department sender " + data.WarehouseSenderAddress);
-            console.log("phone of sender " + data.PhoneSender);
-            console.log("name of sender " + data.SenderFullNameEW);
-            console.log("description of sender " + data.CounterpartySenderDescription);
-            console.log("city recipient " + data.CityRecipient);
-            console.log("physical person " + data.CounterpartyType);
-            console.log("address of the department sender " + data.WarehouseRecipientAddress);
-            console.log("phone of recipient " + requestBody.methodProperties.Documents[0].Phone);
-            console.log("name of recipient " + data.RecipientFullName);
-            console.log("Number of places " + data.SeatsAmount);
-            console.log("Cargo weight " + data.DocumentWeight);
-            console.log("Type of cargo " + data.CargoType);
-            console.log("who pays for the cargo " + data.PayerType);
-            console.log("Price of delivery " + data.DocumentCost);
-            console.log("Payment Method " + data.PaymentMethod);
-            console.log("Storage " + data.VolumeWeight);
-            console.log("Description " + data.CargoDescriptionString);
-            console.log("Near price " + data.AnnouncedPrice);   
+        data.PhoneRecipient=requestBody.methodProperties.Documents[0].Phone;
+        console.log("number of send " + data.Number);
+        console.log("creation date " + data.DateCreated);
+        console.log("estimated date of arrival of the cargo " + data.ScheduledDeliveryDate);
+        console.log("city sender " + data.CitySender);
+        console.log("address of the department sender " + data.WarehouseSenderAddress);
+        console.log("phone of sender " + data.PhoneSender);
+        console.log("name of sender " + data.SenderFullNameEW);
+        console.log("description of sender " + data.CounterpartySenderDescription);
+        console.log("city recipient " + data.CityRecipient);
+        console.log("physical person " + data.CounterpartyType);
+        console.log("address of the department sender " + data.WarehouseRecipientAddress);
+        console.log("phone of recipient " + data.PhoneRecipient);
+        console.log("name of recipient " + data.RecipientFullName);
+        console.log("Number of places " + data.SeatsAmount);
+        console.log("Cargo weight " + data.DocumentWeight);
+        console.log("Type of cargo " + data.CargoType);
+        console.log("who pays for the cargo " + data.PayerType);
+        console.log("Price of delivery " + data.DocumentCost);
+        console.log("Payment Method " + data.PaymentMethod);
+        console.log("Storage " + data.VolumeWeight);
+        console.log("Description " + data.CargoDescriptionString);
+        console.log("Near price " + data.AnnouncedPrice);
     }
 }
 
@@ -294,3 +230,77 @@ form.addEventListener('input', debounce(function (e) {
             break;
     }
 }));
+
+
+//----------------------------------
+// test section
+
+const url2 = "https://api.novaposhta.ua/v2.0/json/";
+const configKEY2 = "8927155094ab3dbc66bcc1dfee991a94";
+
+let requestBodyTest = {
+    apiKey: configKEY2,
+    modelName: "TrackingDocument",
+    calledMethod: "getStatusDocuments",
+    methodProperties: {
+        //all good
+        // Documents: [{
+        //     DocumentNumber: "59000923176082",
+        ////sender
+        //     Phone: "0676733781"
+        // }]
+        Documents: [{
+            DocumentNumber: "59000923176535",
+            //recipient
+            // Phone: "0974550376"
+            Phone: "0676733781"
+
+        }]
+        //AnnouncedPrice
+
+        //no phone number
+        // Documents: [{
+        //     DocumentNumber: "59000923176082",
+        //     Phone: ""
+        // }]
+
+        //Document number is not correct        
+        // Documents: [204000487299001]
+    }
+};
+
+async function GetResponseResultTest() {
+    let response2 = await fetch(url2, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBodyTest),
+    });
+
+    console.log(await response2);
+
+    return await response2.json();
+
+}
+
+const documentNumber2 = document.querySelector('#documentNumber');
+const senderPhone2 = document.querySelector('#senderPhone');
+
+async function lr() {
+    let mm = await GetResponseResultTest();
+    console.log(mm);
+    if (mm.errors.length == 0) {
+        if (mm.data[0].PhoneRecipient == "" && mm.data[0].PhoneSende == "") {
+            showError(senderPhone2, `Not valid phone number`)
+        }
+        else {
+            console.log("You entered good number")
+        }
+    }
+    else {
+        showError(documentNumber2, `Document number is not correct`)
+    }
+}
+
+// lr();
