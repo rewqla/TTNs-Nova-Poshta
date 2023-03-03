@@ -148,32 +148,38 @@
                             <label for="recipientName">Ім’я</label>
                             <input class="form-control" id="recipientName" disabled="true" placeholder="Введіть ім’я"
                               value="Степап">
+                            <span for="recipientName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="recipientMiddleName">Ім’я по батькові</label>
                             <input class="form-control" id="recipientMiddleName" disabled="true"
                               placeholder="Введіть іІм’я по батькові" value="Радіславович">
+                            <span for="recipientMiddleName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="recipientLastName">Прізвище</label>
                             <input class="form-control" id="recipientLastName" disabled="true"
                               placeholder="Введіть прізвище" value="Стефанчик">
+                            <span for="recipientLastName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="recipientPhone">Номер телефон</label>
                             <input class="form-control" id="recipientPhone" disabled="true"
-                              placeholder="Введіть номер телефо" value="380956437622">
+                              placeholder="Введіть номер телефону" value="380956437622">
+                            <span for="recipientPhone" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="recipientCity">Місто</label>
                             <input class="form-control" id="recipientCity" disabled="true" placeholder="Введіть місто"
                               value="Рівне">
+                            <span for="recipientCity" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="recipientAddress">Адреса відділення</label>
                             <input class="form-control" id="recipientAddress" disabled="true"
                               placeholder="Введіть aдресу відділення"
                               value="Відділення №6 (до 30 кг на одне місце): вул. Київська, 44 (біля кафе Мономах)">
+                            <span for="recipientAddress" class="text-danger"></span>
                           </div>
                         </div>
                       </div>
@@ -192,21 +198,25 @@
                             <label for="senderName">Ім’я</label>
                             <input class="form-control" id="senderName" disabled="true" placeholder="Введіть ім’я"
                               value="Юрій">
+                            <span for="senderName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="senderMiddleName">Ім’я по батькові</label>
                             <input class="form-control" id="senderMiddleName" disabled="true"
                               placeholder="Введіть іІм’я по батькові" value="Олегович">
+                            <span for="senderMiddleName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="senderLastName">Прізвище</label>
                             <input class="form-control" id="senderLastName" disabled="true"
                               placeholder="Введіть прізвище" value="Мосійчук">
+                            <span for="senderLastName" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="sendertPhone">Номер телефон</label>
+                            <label for="senderPhone">Номер телефон</label>
                             <input class="form-control" id="senderPhone" placeholder="Введіть номер телефо"
                               value="380973296464">
+                            <span for="senderPhone" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="senderCity">Місто</label>
@@ -214,6 +224,7 @@
                                 class="fa fa-question-circle-o" data-toggle="tooltip"
                                 data-original-title="Share"></span></a>
                             <input class="form-control" id="senderCity" placeholder="Введіть місто" value="Рівне">
+                            <span for="senderCity" class="text-danger"></span>
                           </div>
                           <div class="p-1">
                             <label for="senderAddress">Адреса відділення</label>
@@ -222,6 +233,7 @@
                                 data-original-title="Share"></span></a>
                             <input class="form-control" id="senderAddress" placeholder="Введіть aдресу відділення"
                               value="Відділення №1: вул. Князя Володимира 109а">
+                            <span for="senderAddress" class="text-danger"></span>
                           </div>
                         </div>
                       </div>
@@ -229,17 +241,18 @@
                     <div class="accordion-item">
                       <h2 class="accordion-header" id="headingThree">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#anotherForm" aria-expanded="false" aria-controls="anotherForm">
+                          data-bs-target="#additionalForm" aria-expanded="false" aria-controls="additionalForm">
                           Інші послуги
                         </button>
                       </h2>
-                      <div id="anotherForm" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                      <div id="additionalForm" class="accordion-collapse collapse" aria-labelledby="headingThree"
                         data-bs-parent="#accordion">
                         <div class="p-1">
                           <div class="p-1">
                             <label for="description">Опис </label>
                             <input class="form-control" name="description" id="description" placeholder="Введіть опис"
                               value="Парка Yellow M1 XS">
+                            <span for="description" class="text-danger"></span>
                           </div>
                           <div class="row p-1">
                             <div class="col-sm-6">
@@ -262,13 +275,11 @@
                                             <div class="col-sm-6">
                                                 <label for="payer">Тип вантажу </label>
                                                 <select class="form-select">
-           
                                                   </select>
                                             </div>
                                             <div class="col-sm-6">
                                                 <label for="payer">Тип послуги </label>
                                                 <select class="form-select">
-
                                                   </select>
                                             </div>
                                         </div> -->
@@ -276,20 +287,24 @@
                             <div class="col-sm-6">
                               <label for="weight">Вага вантажу(кг)</label>
                               <input class="form-control" id="weight" placeholder="Введіть опис" value="0.2">
+                              <span for="weight" class="text-danger"></span>
                             </div>
                             <div class="col-sm-6">
                               <label for="volumeGeneral">Загальний обєм</label>
                               <input class="form-control" id="volumeGeneral" placeholder="Введіть опис" value="1">
+                              <span for="volumeGeneral" class="text-danger"></span>
                             </div>
                           </div>
                           <div class="row p-1">
                             <div class="col-sm-6">
                               <label for="seatsAmount">Кількість місць</label>
                               <input class="form-control" id="seatsAmount" placeholder="Введіть опис" value="1">
+                              <span for="seatsAmount" class="text-danger"></span>
                             </div>
                             <div class="col-sm-6">
                               <label for="cost">Оцінювальна вартість</label>
                               <input class="form-control" id="cost" placeholder="Введіть опис" value="2200">
+                              <span for="cost" class="text-danger"></span>
                             </div>
                           </div>
                           <div class="row p-1">
@@ -303,10 +318,11 @@
                                   </span>
                                 </span>
                               </div>
+                              <span for="dateTime" class="text-danger"></span>
                             </div>
-
                           </div>
-                          <button type="submit" class="btn btn-warning m-1">Створити
+                          <!-- type="submit" -->
+                          <button  class="btn btn-warning m-1">Створити
                             накладну</button>
                         </div>
                       </div>
