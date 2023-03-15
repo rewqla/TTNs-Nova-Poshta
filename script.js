@@ -1,36 +1,9 @@
 const url = "https://api.novaposhta.ua/v2.0/json/";
 const configKEY = "82553fd1d61bd7d87d24d3a51fa6c0c9";
 
-// methodProperties: {
-//     SenderWarehouseIndex: "101/102", //getWarehouseCity +
-//     RecipientWarehouseIndex: "101/102", //getWarehouseCity +
-//     PayerType: "Recipient", /взяти з форми  +
-//     PaymentMethod: "NonCash", //взяти з форми + 
-//     DateTime: "дд.мм.рррр", // взяти з форми +
-//     CargoType: "Parcel",  //тільки так
-//     Weight: "0.5",  //взяти з форми +
-//     ServiceType: "WarehouseWarehouse", //тільки так
-//     SeatsAmount: "2", //взяти з форми + 
-//     Description: "Додатковий опис відправлення",  // взяти з форми +
-//     Cost: "15000", // взяти з форми +
-
-//     CitySender: "00000000-0000-0000-0000-000000000000", //getWarehouseCity +
-//     Sender: "00000000-0000-0000-0000-000000000000", //getContactPersons+
-//     SenderAddress: "00000000-0000-0000-0000-000000000000", //getWarehouseCity +
-//     ContactSender: "00000000-0000-0000-0000-000000000000", //getContactPersons +
-//     SendersPhone: "380660000000", // getContactPersons +
-
-//     CityRecipient: "00000000-0000-0000-0000-000000000000", //getWarehouseCity +
-//     Recipient: "00000000-0000-0000-0000-000000000000", //createContactPersonRecipient +
-//     RecipientAddress: "00000000-0000-0000-0000-000000000000",//getWarehouseCity +
-//     ContactRecipient: "00000000-0000-0000-0000-000000000000", //createContactPersonRecipient +
-//     RecipientsPhone: "380660000000" // createContactPersonRecipient +
-// }
-
 //4d5d01a7-b132-11ed-a60f-48df37b921db - отримувач ref контрагент
 //4d3d25aa-b132-11ed-a60f-48df37b921db - відправник ref контрагент
 //"208a60fa-45fc-48ef-98e5-53f0819ebf4f" - контрагент 
-"4d5d01a7-b132-11ed-a60f-48df37b921db"
 
 //Метод для запитів
 async function GetResponseResult(model, method, properties) {
@@ -173,7 +146,7 @@ function CheckFieldsIfEmpty() {
     return isValid;
 }
 
-function checkPhone(typeOfPerson) {
+function CheckPhone(typeOfPerson) {
     //++++
     let regexPhone = new RegExp("^([+]?(38))?(0[0-9]{9})$");
     let phone = document.getElementById(typeOfPerson + "Phone");
@@ -218,13 +191,12 @@ async function CheckAddress(typeOfPerson) {
     return false;
 }
 
-
 async function CheckRecipientData() {
-    return checkPhone("recipient") && await CheckAddress("recipient");
+    return CheckPhone("recipient") && await CheckAddress("recipient");
 }
 
 async function CheckSenderData() {
-    return checkPhone("sender") && await CheckAddress("sender");
+    return CheckPhone("sender") && await CheckAddress("sender");
 }
 
 function CheckAdditionalData() {
@@ -253,27 +225,41 @@ function CheckAdditionalData() {
     return isValid;
 }
 
+function BackwardDelivery() {
+    //++++
+    let label = document.getElementById("BackwardLabel");
+    label.style.visibility = "hidden";
+    if (document.getElementById("OrderPayment").textContent === "Оплата при отриманні") {
+        label.style.visibility = "visible";
+        return {
+            "BackwardDeliveryData": [{
+                "PayerType": "Recipient",
+                "CargoType": "Money",
+                "RedeliveryString": getByIdValue("cost")
+            }]
+        };
+    }
+}
+BackwardDelivery();
+
 let novaPoshtaForm = document.getElementById("novaPoshtaForm");
 novaPoshtaForm.addEventListener("submit", async function (e) {
+    //++++
     if (await CheckSenderData() && await CheckRecipientData() && CheckAdditionalData() && CheckFieldsIfEmpty()) {
-        // e.preventDefault();
-        // console.log(2)
-        //no problems
         let params = await createContactPersonRecipient(getByIdValue("recipientName"), getByIdValue("recipientMiddleName"), getByIdValue("recipientLastName"), getByIdValue("recipientPhone"));;
 
         Object.assign(params, await getWarehouseCity(getByIdValue("recipientCity"), getByIdValue("recipientAddress"), "Recipient"));
         Object.assign(params, await getContactPersons(await getCounterpartyRef("Sender"), "Sender"));
         Object.assign(params, await getWarehouseCity(getByIdValue("senderCity"), getByIdValue("senderAddress"), "Sender"));
         Object.assign(params, await GetPageData());
+        Object.assign(params, await BackwardDelivery());
 
         params.CargoType = "Parcel";
         params.ServiceType = "WarehouseWarehouse";
 
-        newInternetDocument(params);
+        console.log(params)
+        // newInternetDocument(params);
     }
-    // else{
-    //     console.log(1)
-    // }
 });
 
 async function printInternetDocument() {
@@ -296,3 +282,21 @@ function getByIdValue(Id) {
 $('#datepicker').datepicker({ language: 'uk' }).datepicker("setDate", 'now');;
 
 
+//документ 
+//відслідкування
+
+async function TrackingStatus() {
+    let xz = await GetResponseResult("TrackingDocument", "getStatusDocuments", {
+        Documents: [
+            {
+                DocumentNumber: "20450673312983",
+                Phone: "380973296464"
+                // DocumentNumber: "59000923175689",
+                // Phone: "3809676733781"
+            }
+        ]
+    });
+    console.log(xz);
+    // Status
+}
+Tracking();

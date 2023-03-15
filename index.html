@@ -94,7 +94,8 @@
                 <dt>Телефон</dt>
                 <dd>380956437622</dd>
                 <dt>Спосіб оплати</dt>
-                <dd>Банком</dd>
+                <dd id="OrderPayment">Банківський переказ</dd>
+                <!-- <dd id="OrderPayment">Оплата при отриманні</dd> -->
               </dl>
 
               <h3>Інформація про продукт</h3>
@@ -320,9 +321,13 @@
                               </div>
                               <span for="dateTime" class="text-danger"></span>
                             </div>
+                            <div class="col-sm-6">
+                              <label id="BackwardLabel" style="margin-top: 7%;">Послуга "Зворотня доставка грошей" включена <i class="fa fa-check-circle-o"
+                                  aria-hidden="true"></i></label>
+                            </div>
                           </div>
                           <!-- type="submit" -->
-                          <button  class="btn btn-warning m-1">Створити
+                          <button class="btn btn-warning m-1">Створити
                             накладну</button>
                         </div>
                       </div>
@@ -340,3 +345,4 @@
 </body>
 
 </html>
+
