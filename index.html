@@ -94,8 +94,8 @@
                 <dt>Телефон</dt>
                 <dd>380956437622</dd>
                 <dt>Спосіб оплати</dt>
-                <dd id="OrderPayment">Банківський переказ</dd>
-                <!-- <dd id="OrderPayment">Оплата при отриманні</dd> -->
+                <dd id="order-payment-method">Банківський переказ</dd>
+                <!-- <dd id="order-payment-method">Оплата при отриманні</dd> -->
               </dl>
 
               <h3>Інформація про продукт</h3>
@@ -133,54 +133,66 @@
 
             <div class="col-md-6">
               <div class="novaposhta-container">
+                <div class="card mt-5 d-none" id="tracking-info">
+                  <div class="card-header">Інформація про посилку</div>
+                  <div class="card-body">
+                    <p>Номер посилки: <span id="package-number"></span></p>
+                    <p>Статус посилки: <span id="package-status"></span></p>
+                    <p>Дата створення: <span id="package-sent-date"></span></p>
+                    <p>Дата отримання: <span id="package-received-date"></span></p>
+                    <button type="button" class="btn btn-primary" onclick="PrintInternetDocument()">
+                      Роздрукувати інформацію
+                    </button>
+                  </div>
+                </div>
                 <div class="accordion" id="accordion">
-                  <form id="novaPoshtaForm">
+                  <form id="nova-poshta-form">
                     <div class="accordion-item">
                       <h2 class="accordion-header" id="headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#recipientForm">
+                          data-bs-target="#recipient-form">
                           Отримувач
                         </button>
                       </h2>
-                      <div id="recipientForm" class="accordion-collapse collapse " aria-labelledby="headingOne"
+                      <div id="recipient-form" class="accordion-collapse collapse " aria-labelledby="headingOne"
                         data-bs-parent="#accordion">
                         <div class="p-1">
                           <div class="p-1">
-                            <label for="recipientName">Ім’я</label>
-                            <input class="form-control" id="recipientName" disabled="true" placeholder="Введіть ім’я"
+                            <label for="recipient-name">Ім’я</label>
+                            <input class="form-control" id="recipient-name" disabled="true" placeholder="Введіть ім’я"
                               value="Степап">
-                            <span for="recipientName" class="text-danger"></span>
+                            <span for="recipient-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="recipientMiddleName">Ім’я по батькові</label>
-                            <input class="form-control" id="recipientMiddleName" disabled="true"
-                              placeholder="Введіть іІм’я по батькові" value="Радіславович">
-                            <span for="recipientMiddleName" class="text-danger"></span>
+                            <label for="recipient-middle-name">Ім’я по батькові</label>
+                            <input class="form-control" id="recipient-middle-name" disabled="true"
+                              placeholder="Введіть ім’я по батькові" value="Радіславович">
+                            <span for="recipient-middle-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="recipientLastName">Прізвище</label>
-                            <input class="form-control" id="recipientLastName" disabled="true"
+                            <label for="recipient-last-name">Прізвище</label>
+                            <input class="form-control" id="recipient-last-name" disabled="true"
                               placeholder="Введіть прізвище" value="Стефанчик">
-                            <span for="recipientLastName" class="text-danger"></span>
+                            <span for="recipient-last-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="recipientPhone">Номер телефон</label>
-                            <input class="form-control" id="recipientPhone" disabled="true"
+                            <label for="recipient-phone">Номер телефон</label>
+                            <input class="form-control" id="recipient-phone" disabled="true"
                               placeholder="Введіть номер телефону" value="380956437622">
-                            <span for="recipientPhone" class="text-danger"></span>
+                            <span for="recipient-phone" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="recipientCity">Місто</label>
-                            <input class="form-control" id="recipientCity" disabled="true" placeholder="Введіть місто"
+                            <label for="recipient-city">Місто</label>
+                            <input class="form-control" id="recipient-city" disabled="true" placeholder="Введіть місто"
                               value="Рівне">
-                            <span for="recipientCity" class="text-danger"></span>
+                            <span for="recipient-city" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="recipientAddress">Адреса відділення</label>
-                            <input class="form-control" id="recipientAddress" disabled="true"
+                            <label for="recipient-address">Адреса відділення</label>
+                            <input class="form-control" id="recipient-address" disabled="true"
                               placeholder="Введіть aдресу відділення"
                               value="Відділення №6 (до 30 кг на одне місце): вул. Київська, 44 (біля кафе Мономах)">
-                            <span for="recipientAddress" class="text-danger"></span>
+                            <span for="recipient-address" class="text-danger"></span>
                           </div>
                         </div>
                       </div>
@@ -188,53 +200,53 @@
                     <div class="accordion-item">
                       <h2 class="accordion-header" id="headingTwo">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#senderForm" aria-expanded="false" aria-controls="senderForm">
+                          data-bs-target="#sender-form" aria-expanded="false" aria-controls="senderForm">
                           Відправник
                         </button>
                       </h2>
-                      <div id="senderForm" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                      <div id="sender-form" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                         data-bs-parent="#accordion">
                         <div class="p-1">
                           <div class="p-1">
-                            <label for="senderName">Ім’я</label>
-                            <input class="form-control" id="senderName" disabled="true" placeholder="Введіть ім’я"
+                            <label for="sender-name">Ім’я</label>
+                            <input class="form-control" id="sender-name" disabled="true" placeholder="Введіть ім’я"
                               value="Юрій">
-                            <span for="senderName" class="text-danger"></span>
+                            <span for="sender-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="senderMiddleName">Ім’я по батькові</label>
-                            <input class="form-control" id="senderMiddleName" disabled="true"
-                              placeholder="Введіть іІм’я по батькові" value="Олегович">
-                            <span for="senderMiddleName" class="text-danger"></span>
+                            <label for="sender-middle-name">Ім’я по батькові</label>
+                            <input class="form-control" id="sender-middle-name" disabled="true"
+                              placeholder="Введіть ім’я по батькові" value="Олегович">
+                            <span for="sender-middle-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="senderLastName">Прізвище</label>
-                            <input class="form-control" id="senderLastName" disabled="true"
+                            <label for="sender-last-name">Прізвище</label>
+                            <input class="form-control" id="sender-last-name" disabled="true"
                               placeholder="Введіть прізвище" value="Мосійчук">
-                            <span for="senderLastName" class="text-danger"></span>
+                            <span for="sender-last-name" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="senderPhone">Номер телефон</label>
-                            <input class="form-control" id="senderPhone" placeholder="Введіть номер телефо"
+                            <label for="sender-phone">Номер телефон</label>
+                            <input class="form-control" id="sender-phone" placeholder="Введіть номер телефону"
                               value="380973296464">
-                            <span for="senderPhone" class="text-danger"></span>
+                            <span for="sender-phone" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="senderCity">Місто</label>
+                            <label for="sender-city">Місто</label>
                             <a href="https://novaposhta.ua/office/list" style="color: black;" target="_blank"><span
                                 class="fa fa-question-circle-o" data-toggle="tooltip"
                                 data-original-title="Share"></span></a>
-                            <input class="form-control" id="senderCity" placeholder="Введіть місто" value="Рівне">
-                            <span for="senderCity" class="text-danger"></span>
+                            <input class="form-control" id="sender-city" placeholder="Введіть місто" value="Рівне">
+                            <span for="sender-city" class="text-danger"></span>
                           </div>
                           <div class="p-1">
-                            <label for="senderAddress">Адреса відділення</label>
+                            <label for="sender-address">Адреса відділення</label>
                             <a href="https://novaposhta.ua/office/list" style="color: black;" target="_blank"><span
                                 class="fa fa-question-circle-o" data-toggle="tooltip"
                                 data-original-title="Share"></span></a>
-                            <input class="form-control" id="senderAddress" placeholder="Введіть aдресу відділення"
+                            <input class="form-control" id="sender-address" placeholder="Введіть aдресу відділення"
                               value="Відділення №1: вул. Князя Володимира 109а">
-                            <span for="senderAddress" class="text-danger"></span>
+                            <span for="sender-address" class="text-danger"></span>
                           </div>
                         </div>
                       </div>
@@ -242,91 +254,79 @@
                     <div class="accordion-item">
                       <h2 class="accordion-header" id="headingThree">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                          data-bs-target="#additionalForm" aria-expanded="false" aria-controls="additionalForm">
+                          data-bs-target="#additional-information-form" aria-expanded="false" aria-controls="additionalForm">
                           Інші послуги
                         </button>
                       </h2>
-                      <div id="additionalForm" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                      <div id="additional-information-form" class="accordion-collapse collapse" aria-labelledby="headingThree"
                         data-bs-parent="#accordion">
                         <div class="p-1">
                           <div class="p-1">
-                            <label for="description">Опис </label>
+                            <label for="description">Опис</label>
                             <input class="form-control" name="description" id="description" placeholder="Введіть опис"
                               value="Парка Yellow M1 XS">
                             <span for="description" class="text-danger"></span>
                           </div>
                           <div class="row p-1">
                             <div class="col-sm-6">
-                              <label for="payerType">Платник </label>
-                              <select id="payerType" class="form-select">
+                              <label for="payer-type">Платник</label>
+                              <select id="payer-type" class="form-select">
                                 <option value="Recipient">Отримувач</option>
                                 <option value="Sender">Відправник</option>
                                 <option value="ThirdPerson">Третя особа</option>
                               </select>
                             </div>
                             <div class="col-sm-6">
-                              <label for="paymentMethod">Вид платежу </label>
-                              <select id="paymentMethod" class="form-select">
+                              <label for="payment-method">Вид платежу</label>
+                              <select id="payment-method" class="form-select">
                                 <option value="Cash">Готівка</option>
                                 <option value="NonCash">Картка</option>
                               </select>
                             </div>
                           </div>
-                          <!-- <div class="row p-1">
-                                            <div class="col-sm-6">
-                                                <label for="payer">Тип вантажу </label>
-                                                <select class="form-select">
-                                                  </select>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label for="payer">Тип послуги </label>
-                                                <select class="form-select">
-                                                  </select>
-                                            </div>
-                                        </div> -->
+
                           <div class="row p-1">
                             <div class="col-sm-6">
                               <label for="weight">Вага вантажу(кг)</label>
-                              <input class="form-control" id="weight" placeholder="Введіть опис" value="0.2">
+                              <input class="form-control" id="weight" placeholder="Введіть вагу" value="0.2">
                               <span for="weight" class="text-danger"></span>
                             </div>
                             <div class="col-sm-6">
-                              <label for="volumeGeneral">Загальний обєм</label>
-                              <input class="form-control" id="volumeGeneral" placeholder="Введіть опис" value="1">
-                              <span for="volumeGeneral" class="text-danger"></span>
+                              <label for="volume-general">Загальний обєм</label>
+                              <input class="form-control" id="volume-general" placeholder="Введіть загальний обєм" value="1">
+                              <span for="volume-general" class="text-danger"></span>
                             </div>
                           </div>
                           <div class="row p-1">
                             <div class="col-sm-6">
-                              <label for="seatsAmount">Кількість місць</label>
-                              <input class="form-control" id="seatsAmount" placeholder="Введіть опис" value="1">
-                              <span for="seatsAmount" class="text-danger"></span>
+                              <label for="seats-amount">Кількість місць</label>
+                              <input class="form-control" id="seats-amount" placeholder="Введіть кількість місць" value="1">
+                              <span for="seats-amount" class="text-danger"></span>
                             </div>
                             <div class="col-sm-6">
                               <label for="cost">Оцінювальна вартість</label>
-                              <input class="form-control" id="cost" placeholder="Введіть опис" value="2200">
+                              <input class="form-control" id="cost" placeholder="Введіть ціну товару" value="2200">
                               <span for="cost" class="text-danger"></span>
                             </div>
                           </div>
                           <div class="row p-1">
                             <div class="col-sm-6">
-                              <label for="dateTime">Дата</label>
+                              <label for="DateTime">Дата</label>
                               <div class="input-group date" id="datepicker">
-                                <input type="text" class="form-control" id="dateTime" />
+                                <input type="text" class="form-control" id="DateTime" />
                                 <span class="input-group-append">
                                   <span class="input-group-text bg-light d-block">
                                     <i class="fa fa-calendar"></i>
                                   </span>
                                 </span>
                               </div>
-                              <span for="dateTime" class="text-danger"></span>
+                              <span for="DateTime" class="text-danger"></span>
                             </div>
                             <div class="col-sm-6">
-                              <label id="BackwardLabel" style="margin-top: 7%;">Послуга "Зворотня доставка грошей" включена <i class="fa fa-check-circle-o"
-                                  aria-hidden="true"></i></label>
+                              <label id="backward-label" style="margin-top: 7%;visibility: hidden;">Послуга "Зворотня доставка грошей"
+                                включена <i class="fa fa-check-circle-o" aria-hidden="true"></i></label>
                             </div>
                           </div>
-                          <!-- type="submit" -->
                           <button class="btn btn-warning m-1">Створити
                             накладну</button>
                         </div>
@@ -335,14 +335,27 @@
                   </form>
                 </div>
               </div>
+              <!-- <div class="row p-1">
+                <div class="col-sm-6">
+                  <label for="payer">Тип вантажу </label>
+                  <select class="form-select">
+                  </select>
+                </div>
+                <div class="col-sm-6">
+                  <label for="payer">Тип послуги </label>
+                  <select class="form-select">
+                  </select>
+                </div>  -->
             </div>
           </div>
+
+
         </div>
       </div>
     </div>
+  </div>
   </div>
   <script src="script.js" charset="utf-8"></script>
 </body>
 
 </html>
-
