@@ -241,20 +241,13 @@ async function Tracking(number) {
             }
         ]
     });
+    console.log(trackingData)
     return trackingData.data[0];
 }
 
-//Отриання друкованої форми 
-function PrintInternetDocument() {
-    const num = document.getElementById("package-number").innerText;
-    const url = `https://my.novaposhta.ua/orders/printMarking85x85/orders[]/${num}/type/pdf8/apiKey/${API_KEY}`;//маркування
-    // const url = `https://my.novaposhta.ua/orders/printDocument/orders[]/${num}/type/pdf8/apiKey/${configKEY}`;//документ
 
-    window.open(url, '_blank').focus();
-}
-
-//Загрузка tracking-info 
-async function LoadTrackingInfo(number = null) {
+// LoadTrackingInfo("59000923175689")
+async function LoadTrackingInfo(number) {
     const packageNumber = document.getElementById("package-number");
     document.getElementById("tracking-info").classList.remove("d-none");
     document.getElementById("accordion").classList.add("d-none");
@@ -269,3 +262,89 @@ async function LoadTrackingInfo(number = null) {
 
 //bootstrap
 $('#datepicker').datepicker({ language: 'uk', dateFormat: 'dd, mm, yy' }).datepicker().datepicker("setDate", 'now');
+
+
+
+document.getElementById("TTN-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    HideAll();
+    document.getElementById("generator").classList.remove("d-none");
+
+});
+
+document.getElementById("admin-link").addEventListener("click", (e) => {
+    e.preventDefault();
+    HideAll();
+    document.getElementById("admin-page").classList.remove("d-none");
+
+});
+
+//59000923175689
+document.getElementById("TTN-number-form").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    await LoadTrackingInfo();
+});
+
+async function LoadTrackingInfo(number = null) {
+    HideAll();
+
+    if (number === null) {
+        number = document.getElementById("tracking-numebr").value;
+    }
+
+    if (number.length == 14 && Number.isFinite(+number)) {
+
+        let tracking_data = await Tracking(number);
+        if (tracking_data) {
+            console.log(tracking_data)
+            document.getElementById("tracking-info").classList.remove("d-none");
+
+            document.getElementById("package-number").innerText = number;
+            document.getElementById("package-status").innerText = tracking_data.Status;
+            document.getElementById("package-price").innerText = tracking_data.DocumentCost;
+            document.getElementById("package-creation").innerText = tracking_data.DateCreated.split(' ')[0];
+            document.getElementById("package-receiving").innerText = tracking_data.ActualDeliveryDate.split(' ')[0] ? tracking_data.RecipientDateTime.split(' ')[0] : "Товар в дорозі";
+        }
+        else {
+            document.getElementById("error-block").classList.remove("d-none");
+            document.getElementById("error-text").innerText = "Не знайдено такого замовлення";
+            document.getElementById("error-img").setAttribute("src", "ufo.jpg");
+        }
+    }
+    else {
+        document.getElementById("error-block").classList.remove("d-none");
+        document.getElementById("error-text").innerText = "Не правильний формат номеру замовлення";
+        document.getElementById("error-img").setAttribute("src", "No-Message.svg");
+    }
+}
+
+function HideAll() {
+    document.getElementById("admin-page").classList.add("d-none");
+    document.getElementById("generator").classList.add("d-none");
+    document.getElementById("tracking-info").classList.add("d-none");
+    document.getElementById("error-block").classList.add("d-none");
+}
+
+function PrintExpressPdf() {
+    const num = document.getElementById("package-number").innerText;
+    const url = `https://my.novaposhta.ua/orders/printDocument/orders[]/${num}/type/pdf/apiKey/${API_KEY}`;
+    window.open(url, '_blank').focus();
+}
+
+function PrintExpressHtml() {
+    const num = document.getElementById("package-number").textContent;
+    const url = `https://my.novaposhta.ua/orders/printDocument/orders[]/${num}/type/html/apiKey/${API_KEY}`;
+    window.open(url, '_blank').focus();
+}
+
+function PrintMarkingPdf() {
+    const num = document.getElementById("package-number").innerText;
+    const url = `https://my.novaposhta.ua/orders/printMarking85x85/orders[]/${num}/type/pdf8/apiKey/${API_KEY}`;
+    window.open(url, '_blank').focus();
+}
+
+function PrintMarkingHtml() {
+    const num = document.getElementById("package-number").textContent;
+    const url = `https://my.novaposhta.ua/orders/printMarking85x85/orders[]/${num}/type/html/apiKey/${API_KEY}`;
+    window.open(url, '_blank').focus();
+}
