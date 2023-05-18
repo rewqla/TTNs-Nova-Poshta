@@ -103,24 +103,28 @@ function HideAll() {
 function PrintExpressPdf() {
     const num = document.getElementById("package-number").innerText;
     const url = `https://my.novaposhta.ua/orders/printDocument/orders[]/${num}/type/pdf/apiKey/${API_KEY}`;
+
     window.open(url, '_blank').focus();
 }
 
 function PrintExpressHtml() {
     const num = document.getElementById("package-number").textContent;
     const url = `https://my.novaposhta.ua/orders/printDocument/orders[]/${num}/type/html/apiKey/${API_KEY}`;
+
     window.open(url, '_blank').focus();
 }
 
 function PrintMarkingPdf() {
     const num = document.getElementById("package-number").innerText;
     const url = `https://my.novaposhta.ua/orders/printMarking85x85/orders[]/${num}/type/pdf8/apiKey/${API_KEY}`;
+
     window.open(url, '_blank').focus();
 }
 
 function PrintMarkingHtml() {
     const num = document.getElementById("package-number").textContent;
     const url = `https://my.novaposhta.ua/orders/printMarking85x85/orders[]/${num}/type/html/apiKey/${API_KEY}`;
+
     window.open(url, '_blank').focus();
 }
 
@@ -128,7 +132,6 @@ async function GetCities(FindByString = "") {
     const cities = await GetResponseResult("Address", "getCities", {
         "FindByString": FindByString
     });
-    console.log(cities)
 
     return cities.data;
 }
@@ -146,7 +149,6 @@ async function GetSender(ref) {
     const sender = await GetResponseResult("Counterparty", "getCounterpartyContactPersons", {
         "Ref": ref,
     });
-    console.log(sender)
 
     return sender.data[0];
 }
@@ -155,7 +157,6 @@ async function GetWarehouses(CityName) {
     const warehouses = await GetResponseResult("Address", "getWarehouses", {
         "CityName": CityName
     });
-    // console.log(warehouses)
 
     return warehouses.data;
 }
@@ -223,20 +224,21 @@ async function FillSelectByWarehouses(type) {
 const poshta_form = document.getElementById("nova-poshta-form");
 poshta_form.addEventListener("submit", async function (e) {
     e.preventDefault();
+
     if (CheckIfFieldsEmpty() && await CheckPersonData("recipient") && await CheckPersonData("sender") && CheckAdditionalData()) {
-        console.log("za za za")
-        //     let params = await CreateContactPersonRecipient(GetByIdValue("recipient-name"), GetByIdValue("recipient-middle-name"), GetByIdValue("recipient-last-name"), GetByIdValue("recipient-phone"));;
+        let params = await CreateContactPerson(GetByIdValue("recipient-first-name"), GetByIdValue("recipient-middle-name"),
+            GetByIdValue("recipient-last-name"), GetByIdValue("recipient-phone"), await GetCounterpartyRef("Recipient"));
 
-        //     Object.assign(params, await GetWarehouse(GetByIdValue("recipient-city"), GetByIdValue("recipient-address"), "Recipient"));
-        //     Object.assign(params, await GetContactPersons(await GetCounterpartyRef("Sender"), "Sender"));
-        //     Object.assign(params, await GetWarehouse(GetByIdValue("sender-city"), GetByIdValue("sender-address"), "Sender"));
-        //     Object.assign(params, GetPageData());
-        //     Object.assign(params, BackwardDelivery());
+        Object.assign(params, await FillPersonAddress(GetByIdValue("recipient-city"), GetByIdValue("recipient-address"), "Recipient"));
+        Object.assign(params, await FillSender());
+        Object.assign(params, await FillPersonAddress(GetByIdValue("sender-city"), GetByIdValue("sender-address"), "Sender"));
+        Object.assign(params, FillAdditionData());
+        Object.assign(params, ConfigureServiceType());
+        Object.assign(params, BackwardDelivery());
+        console.log(params)
+        params.CargoType = "Parcel";
 
-        //     params.CargoType = "Parcel";
-        //     params.ServiceType = "WarehouseWarehouse";
-
-        //     LoadTrackingInfo(await NewInternetDocument(params))
+        LoadTrackingInfo(await CreateInternetDocument(params))
     }
 });
 
@@ -265,7 +267,6 @@ function CheckPhone(typeOfPerson) {
     return ValidateInput((typeOfPerson + "-phone"),
         !regexPhone.test(phone), "Не правильний формат телефону", true);
 }
-
 
 function CheckInitials(typeOfPerson) {
     const regexUkrainian = /^[А-ЩЬЮЯЄІЇҐа-щьюяєіїґ]+$/;
@@ -366,115 +367,89 @@ function CheckAdditionalData() {
     return isValid;
 }
 
-function ValidateInput(Id, expression_result, error_message, isValid) {
-    const errorSpan = document.querySelector(`span[for=${Id}]`);
+async function CreateContactPerson(first_name, middle_name, last_name, phone, CounterpartyRef) {
+    const recipient = await GetResponseResult("ContactPerson", "save", {
+        CounterpartyRef: CounterpartyRef,
+        FirstName: first_name,
+        MiddleName: middle_name,
+        LastName: last_name,
+        Phone: phone,
+    });
 
-    if (expression_result) {
-        errorSpan.innerText = error_message;
-        return false;
+    return {
+        "Recipient": CounterpartyRef,
+        "ContactRecipient": recipient.data[0].Ref,
+        "RecipientsPhone": phone
     }
-
-    errorSpan.innerText = "";
-    return isValid;
 }
 
+async function FillPersonAddress(city, address, type) {
+    return {
+        [type + "Address"]: address,
+        ["City" + type]: (await GetCities(city))[0].Ref
+    };
+}
 
+async function FillSender() {
+    const ref = await GetCounterpartyRef("Sender");
 
+    return {
+        "Sender": ref,
+        "ContactSender": (await GetSender(ref)).Ref,
+        "SendersPhone": GetByIdValue("sender-phone")
+    };
+}
 
+function FillAdditionData() {
+    return {
+        Description: GetByIdValue("description"),
+        PayerType: GetByIdValue("payer-type"),
+        PaymentMethod: GetByIdValue("payment-method"),
+        Cost: GetByIdValue("cost"),
+        DateTime: GetByIdValue("DateTime"),
+    };
+}
 
+function ConfigureServiceType() {
+    let recipient_address = document.getElementById("recipient-address");
 
+    if (recipient_address.options[recipient_address.selectedIndex].text.includes("Поштомат")) {
+        return {
+            "ServiceType": "DoorsWarehouse",
+            "OptionsSeat": [{
+                "volumetricVolume": GetByIdValue("volumetric-width")
+                    * GetByIdValue("volumetric-height")
+                    * GetByIdValue("volumetric-length") / 4000,
+                "volumetricHeight": GetByIdValue("volumetric-length"),
+                "volumetricWidth": GetByIdValue("volumetric-width"),
+                "volumetricLength": GetByIdValue("volumetric-height"),
+                "weight": GetByIdValue("doors-weight")
+            }]
+        }
+    }
+    else {
+        return {
+            "Weight": GetByIdValue("weight"),
+            "SeatsAmount": GetByIdValue("seats-amount"),
+            "ServiceType": "WarehouseWarehouse"
+        }
+    }
+}
 
+function BackwardDelivery() {
+    if (document.getElementById("backward-delivery").checked) {
+        return {
+            "BackwardDeliveryData": [{
+                "PayerType": "Recipient",
+                "CargoType": "Money",
+                "RedeliveryString": GetByIdValue("cost")
+            }]
+        };
+    }
+}
 
-// //Створення отримувача, якщо вже такий існує то отримує його дані
-// async function CreateContactPersonRecipient(firstName, middleName, lastName, phone) {
-//     const recipient = await GetResponseResult("Counterparty", "save", {
-//         FirstName: firstName,
-//         MiddleName: middleName,
-//         LastName: lastName,
-//         Phone: phone,
-//         CounterpartyType: "PrivatePerson",
-//         CounterpartyProperty: "Recipient"
-//     });
-
-//     return {
-//         "Recipient": recipient.data[0].Ref,
-//         "ContactRecipient": recipient.data[0].ContactPerson.data[0].Ref,
-//         "RecipientsPhone": phone
-//     }
-// }
-
-// //Отримання WarehouseId, city ref, warehouse ref
-// async function GetWarehouse(city, address, type) {
-//     const warehouses = await GetResponseResult("Address", "getWarehouses", {
-//         CityName: city,
-//     });
-
-//     const warehouse = warehouses.data.find((w) => w.Description === address);
-
-//     return {
-//         [type + "WarehouseIndex"]: warehouse.WarehouseIndex,
-//         [type + "Address"]: warehouse.Ref,
-//         ["City" + type]: warehouse.CityRef
-//     };
-// }
-
-// //Отримання контрагента
-// async function GetCounterpartyRef(type) {
-//     const counterparty = await GetResponseResult("Counterparty", "getCounterparties", {
-//         CounterpartyProperty: type,
-//         Page: 1
-//     });
-
-//     return counterparty.data[0].Ref;
-// }
-
-// //Отримання даних контактних осіб контрагента
-// async function GetContactPersons(ref, type) {
-//     const contacts = await GetResponseResult("Counterparty", "getCounterpartyContactPersons", {
-//         Ref: ref,
-//     });
-
-//     return {
-//         [type]: ref,
-//         ["Contact" + type]: contacts.data[0].Ref,
-//         [type + "sPhone"]: GetByIdValue(type.charAt(0).toLowerCase() + type.slice(1) + "-phone")
-//     }
-// }
-
-// //Отримання даних з additional-information-form
-// function GetPageData() {
-//     return {
-//         Description: GetByIdValue("description"),
-//         PayerType: GetByIdValue("payer-type"),
-//         PaymentMethod: GetByIdValue("payment-method"),
-//         Weight: GetByIdValue("weight"),
-//         SeatsAmount: GetByIdValue("seats-amount"),
-//         Cost: GetByIdValue("cost"),
-//         DateTime: GetByIdValue("DateTime"),
-//     };
-// }
-
-// //Зворотня доставка
-// function BackwardDelivery() {
-//     const label = document.getElementById("backward-label");
-//     const isPaymentOnDelivery = document.getElementById("order-payment-method").textContent === "Оплата при отриманні";
-//     label.style.visibility = isPaymentOnDelivery ? "visible" : "hidden";
-
-//     if (isPaymentOnDelivery) {
-//         return {
-//             "BackwardDeliveryData": [{
-//                 "PayerType": "Recipient",
-//                 "CargoType": "Money",
-//                 "RedeliveryString": GetByIdValue("cost")
-//             }]
-//         };
-//     }
-// }
-// // BackwardDelivery();
-
-
-
-// async function NewInternetDocument(params) {
-//     const internetDocument = await GetResponseResult("InternetDocument", "save", params);
-//     return internetDocument.data[0].IntDocNumber;
-// }
+async function CreateInternetDocument(params) {
+    const internetDocument = await GetResponseResult("InternetDocument", "save", params);
+    console.log(internetDocument)
+    return internetDocument.data[0].IntDocNumber;
+}
