@@ -20,15 +20,13 @@ async function GetResponseResult(model, method, properties) {
     const response = await GetResponse(model, method, properties);
     let result = await response.json();
 
-    // console.log(method)
     if (!result.success)
         result = await RepeatFetch(model, method, properties);
 
-    // console.log(result)
     return result;
 }
+
 async function RepeatFetch(model, method, properties) {
-    // console.log(1222)
     await new Promise(resolve => setTimeout(resolve, 800));
     return await (await GetResponse(model, method, properties)).json();
 }
@@ -148,7 +146,7 @@ async function GetSender(ref) {
     const sender = await GetResponseResult("Counterparty", "getCounterpartyContactPersons", {
         "Ref": ref,
     });
-    // console.log(sender)
+    console.log(sender)
 
     return sender.data[0];
 }
@@ -174,8 +172,8 @@ async function LoadSender() {
 
 document.addEventListener('DOMContentLoaded', async () => {
     await FillSelectByWarehouses("recipient");
-    LoadSender();
     await FillSelectByWarehouses("sender");
+    await LoadSender();
 });
 
 document.getElementById("sender-city").addEventListener('input', async () => {
@@ -248,44 +246,26 @@ async function CheckPersonData(personType) {
 
 async function CheckAddress(typeOfPerson) {
     const city = GetByIdValue(typeOfPerson + "-city");
-    const address = GetByIdValue(typeOfPerson + "-address");
-    let errorSpan = document.querySelector(`span[for=${typeOfPerson}-city]`);
     const warehouses = await GetResponseResult("Address", "getWarehouses", {
         CityName: city
     });
 
-    if (warehouses.data.length > 0) {
-        errorSpan.innerHTML = "";
-        errorSpan = document.querySelector(`span[for=${typeOfPerson}-address]`);
+    // if (ValidateInput((typeOfPerson + "-city"), !(warehouses.data.length > 0), "Введіть правильне місто", true)) {
+    //     const warehouse = warehouses.data.find((w) => w.Ref === address);
+    //     return ValidateInput((typeOfPerson + "-address"), !warehouse, "Проблеми з адрессою відділення", true);
+    // }
 
-        const warehouse = warehouses.data.find((w) => w.Ref === address);
-
-        if (warehouse) {
-            errorSpan.innerHTML = "";
-            return true;
-        }
-
-        errorSpan.innerHTML = "Проблеми з адрессою відділення";
-        return false;
-    }
-
-    errorSpan.innerHTML = "Введіть правильне місто";
-    return false;
+    return ValidateInput((typeOfPerson + "-city"), !(warehouses.data.length > 0), "Введіть правильне місто", true);
 }
 
 function CheckPhone(typeOfPerson) {
     const regexPhone = new RegExp("^([+]?(38))?(0[0-9]{9})$");
     const phone = GetByIdValue(typeOfPerson + "-phone");
-    const errorSpan = document.querySelector(`span[for=${typeOfPerson}-phone]`);
 
-    if (regexPhone.test(phone)) {
-        errorSpan.innerText = "";
-        return true;
-    }
-
-    errorSpan.innerText = "Не правильний формат телефону";
-    return false;
+    return ValidateInput((typeOfPerson + "-phone"),
+        !regexPhone.test(phone), "Не правильний формат телефону", true);
 }
+
 
 function CheckInitials(typeOfPerson) {
     const regexUkrainian = /^[А-ЩЬЮЯЄІЇҐа-щьюяєіїґ]+$/;
@@ -293,14 +273,8 @@ function CheckInitials(typeOfPerson) {
     let isValid = true;
 
     for (let i = 0; i < 3; i++) {
-        const errorSpan = document.querySelector(`span[for=${initials[i].id}]`);
-
-        if (regexUkrainian.test(initials[i].value.trim())) {
-            errorSpan.innerText = "";
-        }
-        else {
-            errorSpan.innerText = "Дані мають містити лише українські букви";
-        }
+        isValid = ValidateInput(initials[i].id, !regexUkrainian.test(initials[i].value.trim()),
+            "Дані мають містити лише українські букви", isValid);
     }
 
     return isValid;
@@ -319,15 +293,7 @@ function CheckIfFieldsEmpty() {
     inputs.splice(-1, 1);
 
     inputs.forEach(element => {
-        const errorSpan = document.querySelector(`span[for=${element.id}]`);
-
-        if (element.value.trim() === '') {
-            errorSpan.innerText = "Поле має бути не пустим";
-            isValid = false;
-        }
-        else {
-            errorSpan.innerText = "";
-        }
+        isValid = ValidateInput(element.id, (element.value.trim() === ''), "Поле не може бути порожнім", isValid)
     });
 
     return isValid;
@@ -343,104 +309,79 @@ function GetCurrentDate() {
     return `${day}.${month}.${year}`;
 }
 
+function ValidateInput(Id, expression_result, error_message, isValid) {
+    const errorSpan = document.querySelector(`span[for=${Id}]`);
+
+    if (expression_result) {
+        errorSpan.innerText = error_message;
+        return false;
+    }
+
+    errorSpan.innerText = "";
+    return isValid;
+}
+
 function CheckAdditionalData() {
     let isValid = true;
 
     let elem = GetByIdValue("description");
-    let errorSpan = document.querySelector("span[for=description]");
-
-    if (elem.trim().length <= 0) {
-        errorSpan.innerHTML = "Опис відправлення має бути не пустим";
-        isValid = false;
-    }
-    else
-        errorSpan.innerHTML = "";
+    isValid = ValidateInput("description", elem.trim().length <= 0, "Опис відправлення має бути не пустим", isValid);
 
     elem = GetByIdValue("cost");
-    errorSpan = document.querySelector("span[for=cost]");
+    isValid = ValidateInput("cost", (+elem <= 0 || +elem > 10000 || !Number.isInteger(+elem)),
+        "Ціна має бути цілим числом більшим за 0 і меншим за 10 000", isValid);
 
-    if (+elem <= 0 || +elem > 10000 || !Number.isInteger(+elem)) {
-        errorSpan.innerHTML = "Ціна має бути цілим числом більшим за 0 і меншим за 10 000";
-        isValid = false;
-    }
-    else
-        errorSpan.innerHTML = "";
-
+    //!!!!!!
     elem = GetByIdValue("DateTime");
-    errorSpan = document.querySelector("span[for=DateTime]");
-
-    if (elem < GetCurrentDate()) {
-        errorSpan.innerHTML = "Дата не може бути меншою за сьогоднішній день";
-        isValid = false;
-    }
-    else
-        errorSpan.innerHTML = "";
+    isValid = ValidateInput("DateTime", elem < GetCurrentDate(),
+        "Дата не може бути меншою за сьогоднішній день", isValid);
 
     if (document.getElementById("warehouse-section").classList.contains("d-none")) {
         elem = +GetByIdValue("doors-weight");
-        errorSpan = document.querySelector("span[for=doors-weight]");
-
-        if (elem <= 0 || elem > 20 || !Number.isFinite(elem)) {
-            errorSpan.innerHTML = "Вага має бути числом більшим за 0 і меншим за 20";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("doors-weight", (elem <= 0 || elem > 20 || !Number.isFinite(elem)),
+            "Вага має бути числом більшим за 0 і меншим за 20", isValid);
 
         elem = +GetByIdValue("volumetric-width");
-        errorSpan = document.querySelector("span[for=volumetric-width]");
-
-        if (elem <= 0 || elem > 40 || !Number.isFinite(elem)) {
-            errorSpan.innerHTML = "Ширина одного місця має бути числом більшим за 0 і меншим за 40";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("volumetric-width", (elem <= 0 || elem > 40 || !Number.isFinite(elem)),
+            "Ширина одного місця має бути числом більшим за 0 і меншим за 40", isValid);
 
         elem = +GetByIdValue("volumetric-length");
-        errorSpan = document.querySelector("span[for=volumetric-length]");
-
-        if (elem <= 0 || elem > 60 || !Number.isFinite(elem)) {
-            errorSpan.innerHTML = "Довжина одного місця має бути число більшим за 0 і меншим за 60";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("volumetric-length", (elem <= 0 || elem > 60 || !Number.isFinite(elem)),
+            "Довжина одного місця має бути число більшим за 0 і меншим за 60", isValid);
 
         elem = +GetByIdValue("volumetric-height");
-        errorSpan = document.querySelector("span[for=volumetric-height]");
-
-        if (elem <= 0 || elem > 30 || !Number.isFinite(elem)) {
-            errorSpan.innerHTML = "Висота одного місця має бути числом більшим за 0 і меншим за 30";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("volumetric-height", (elem <= 0 || elem > 30 || !Number.isFinite(elem)),
+            "Висота одного місця має бути числом більшим за 0 і меншим за 30", isValid);
     }
     else {
         elem = +GetByIdValue("weight");
-        errorSpan = document.querySelector("span[for=weight]");
-
-        if (elem <= 0 || !Number.isFinite(elem)) {
-            errorSpan.innerHTML = "Вага має бути числом більшим за 0";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("weight", (elem <= 0 || !Number.isFinite(elem)),
+            "Вага має бути числом більшим за 0", isValid);
 
         elem = +GetByIdValue("seats-amount");
-        errorSpan = document.querySelector("span[for=seats-amount]");
-
-        if (elem <= 0 || !Number.isInteger(elem)) {
-            errorSpan.innerHTML = "Кількість місць має бути цілим числом більшим за 0";
-            isValid = false;
-        }
-        else
-            errorSpan.innerHTML = "";
+        isValid = ValidateInput("seats-amount", (elem <= 0 || !Number.isFinite(elem)),
+            "Кількість місць має бути цілим числом більшим за 0", isValid);
     }
 
     return isValid;
 }
+
+function ValidateInput(Id, expression_result, error_message, isValid) {
+    const errorSpan = document.querySelector(`span[for=${Id}]`);
+
+    if (expression_result) {
+        errorSpan.innerText = error_message;
+        return false;
+    }
+
+    errorSpan.innerText = "";
+    return isValid;
+}
+
+
+
+
+
 
 
 
